@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>미용실 예약</title>
+<meta name="description" content="로그인 없이 쓰는 미용실 예약·알림 문자 관리">
+<meta name="theme-color" content="#FFF8F8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1C1316" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="미용실 예약">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preload" href="gowun-batang-bold.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:"Gowun Batang";font-weight:700;font-display:swap;src:url(gowun-batang-bold.woff2) format("woff2")}
+/* 로즈 & 펄: 연분홍 바탕, 흰 카드, 짙은 로즈 포인트 */
+:root{
+  --bg:#fff8f8; --surface:#fff; --ink:#2b1c21; --muted:#87707a; --line:#f0dfe4;
+  --accent:#b4456a; --on-accent:#fff; --container:#ffd9e2; --on-container:#3e0020;
+  --hero-a:#f9c7d4; --hero-b:#ffe3d3; --hero-ink:#4a1a2c;
+  --week-bg:#ede3f7; --week-fg:#5b3f78; --day-bg:#ffe0d1; --day-fg:#8a3a17;
+  --plain-bg:#f6eaee; --plain-fg:#6a4a52; --over-bg:#efe6e8; --over-fg:#5e4b50;
+  --danger:#ba1a1a; --ok:#2f8f63; --scrim:rgb(43 28 33 / .42);
+  --av1:#ffd9e2; --av2:#ede3f7; --av3:#ffe0d1; --av4:#dff1ea; --av-ink:#4a2a35;
+  --shadow:0 2px 12px rgb(180 69 106 / .08);
+  --display:"Gowun Batang","AppleMyungjo","Nanum Myeongjo",serif;
+  --body:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#1c1316; --surface:#271c20; --ink:#f3e3e7; --muted:#b39aa3; --line:#3a2a30;
+  --accent:#ffb1c6; --on-accent:#65002e; --container:#8f2d52; --on-container:#ffd9e2;
+  --hero-a:#5b2238; --hero-b:#4d2b22; --hero-ink:#ffe4ea;
+  --week-bg:#3a2d4a; --week-fg:#dcc6f5; --day-bg:#4d2b1d; --day-fg:#ffb998;
+  --plain-bg:#33252a; --plain-fg:#dcc0c8; --over-bg:#3a3033; --over-fg:#d5c9c7;
+  --danger:#ffb4ab; --ok:#7fd8a8; --scrim:rgb(0 0 0 / .55);
+  --av1:#5b2238; --av2:#3a2d4a; --av3:#4d2b1d; --av4:#21382f; --av-ink:#ffe4ea;
+  --shadow:none; color-scheme:dark}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;-webkit-text-size-adjust:100%}
+body{min-height:100dvh;overscroll-behavior-y:none}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+
+.page{max-width:560px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 8px) max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 110px) max(16px,env(safe-area-inset-left,0px))}
+.topbar{display:flex;align-items:center;gap:10px;padding:8px 2px 14px}
+.topbar h1{flex:1;margin:0;font-family:var(--display);font-size:1.5rem;font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.iconbtn{width:42px;height:42px;border-radius:50%;border:0;background:var(--surface);box-shadow:var(--shadow);display:grid;place-items:center;color:var(--accent);flex:none}
+.iconbtn svg{width:22px;height:22px}
+
+.hero{border-radius:24px;padding:18px 20px;background:linear-gradient(135deg,var(--hero-a),var(--hero-b));color:var(--hero-ink);display:flex;flex-direction:column;gap:3px}
+.hero .k{font-size:.82rem;opacity:.85}
+.hero .v{font-family:var(--display);font-size:1.75rem;font-weight:700}
+.hero .s{margin-top:6px;font-size:.82rem}
+
+.banner{margin-top:12px;border-radius:18px;background:var(--surface);box-shadow:var(--shadow);padding:13px 14px;display:flex;gap:10px;align-items:center;font-size:.86rem;line-height:1.45}
+.banner p{margin:0;flex:1}
+.banner .x{border:0;background:none;color:var(--muted);font-size:1.1rem;padding:4px 6px}
+.linkbtn{border:0;background:none;color:var(--accent);font-weight:700;padding:4px 0}
+
+.h{font-family:var(--display);font-weight:700;font-size:1.12rem;margin:26px 2px 10px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.h span{font-family:var(--body);font-weight:400;font-size:.82rem;color:var(--muted)}
+.list{display:flex;flex-direction:column;gap:10px}
+.empty{color:var(--muted);font-size:.9rem;padding:6px 4px;line-height:1.5}
+
+.card{width:100%;text-align:left;border:0;background:var(--surface);border-radius:20px;padding:12px 14px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow)}
+.av{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:1.1rem;color:var(--av-ink);flex:none}
+.a0{background:var(--av1)}.a1{background:var(--av2)}.a2{background:var(--av3)}.a3{background:var(--av4)}
+.card .l{flex:1;min-width:0}
+.card .n{font-weight:700;font-size:1rem}
+.card .s{font-size:.8rem;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .r{text-align:right;font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums;flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.badge{display:inline-block;border-radius:99px;padding:3px 10px;font-size:.74rem;font-weight:700;white-space:nowrap}
+.b-week{background:var(--week-bg);color:var(--week-fg)}
+.b-day{background:var(--day-bg);color:var(--day-fg)}
+.b-plain{background:var(--plain-bg);color:var(--plain-fg)}
+.b-over{background:var(--over-bg);color:var(--over-fg)}
+.alert-row{display:flex;flex-direction:column;gap:0;background:var(--surface);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
+.alert-row .card{box-shadow:none;border-radius:0}
+.alert-row .send{display:flex;align-items:center;justify-content:center;gap:6px;margin:0 12px 12px;padding:11px;border-radius:99px;background:var(--accent);color:var(--on-accent);font-weight:700;text-decoration:none;font-size:.92rem}
+
+.search{width:100%;border:0;border-radius:99px;background:var(--surface);box-shadow:var(--shadow);padding:12px 18px;font-size:.95rem;margin-bottom:10px;outline-offset:0}
+.search::placeholder{color:var(--muted)}
+
+.fab{position:fixed;right:max(18px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 18px);border:0;border-radius:99px;background:var(--accent);color:var(--on-accent);font-weight:700;font-size:1rem;padding:15px 22px;box-shadow:0 8px 20px rgb(180 69 106 / .35);display:flex;align-items:center;gap:6px;z-index:5}
+
+/* 새 창(전체 화면 시트) */
+.sheet{position:fixed;inset:0;background:var(--bg);z-index:20;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .26s cubic-bezier(.2,.8,.2,1)}
+.sheet.open{transform:none}
+.sheet header{display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top,0px) + 8px) max(12px,env(safe-area-inset-right,0px)) 10px max(12px,env(safe-area-inset-left,0px))}
+.sheet header h2{flex:1;margin:0;font-family:var(--display);font-weight:700;font-size:1.3rem}
+.back{border:0;background:none;color:var(--accent);width:42px;height:42px;display:grid;place-items:center;border-radius:50%}
+.back svg{width:24px;height:24px}
+.sheet .body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:4px max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 28px) max(16px,env(safe-area-inset-left,0px))}
+.sheet .inner{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+@media (prefers-reduced-motion:reduce){.sheet{transition:none}}
+
+.prof{display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 0 6px}
+.prof .av{width:76px;height:76px;font-size:1.9rem}
+.prof .big{font-family:var(--display);font-weight:700;font-size:1.7rem;margin-top:6px}
+.prof a{color:var(--muted);text-decoration:none;font-variant-numeric:tabular-nums}
+.info{border-radius:20px;background:var(--surface);box-shadow:var(--shadow);padding:14px 16px;display:grid;grid-template-columns:auto 1fr;gap:9px 16px;font-size:.92rem;margin:0}
+.info dt{color:var(--muted)} .info dd{margin:0;font-variant-numeric:tabular-nums;min-width:0;overflow-wrap:anywhere;white-space:pre-wrap}
+.info dd b{color:var(--accent)}
+
+.btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;border:0;border-radius:99px;padding:14px 16px;font-weight:700;font-size:.97rem;text-decoration:none;text-align:center}
+.btn.fill{background:var(--accent);color:var(--on-accent)}
+.btn.tonal{background:var(--container);color:var(--on-container)}
+.btn.out{background:var(--surface);color:var(--accent);box-shadow:inset 0 0 0 1px var(--line)}
+.btn.danger{background:var(--surface);color:var(--danger);box-shadow:inset 0 0 0 1px var(--line)}
+.st{font-size:.8rem;color:var(--muted);text-align:center;margin:-4px 0 4px}
+.st.ok{color:var(--ok)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+.field{display:flex;flex-direction:column;gap:5px;background:var(--surface);border-radius:16px;padding:10px 14px 10px;box-shadow:var(--shadow)}
+.field:focus-within{box-shadow:0 0 0 2px var(--accent)}
+.field label{font-size:.76rem;color:var(--muted)}
+.field input,.field textarea{border:0;background:none;padding:2px 0;font-size:1.02rem;outline:none;width:100%;min-width:0}
+.field textarea{resize:vertical;min-height:84px;line-height:1.5;font-size:.95rem}
+.field .with-suf{display:flex;align-items:center;gap:8px}
+.field .suf{color:var(--muted);flex:none}
+.field.err{box-shadow:0 0 0 2px var(--danger)}
+.errmsg{color:var(--danger);font-size:.78rem}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:0;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line);border-radius:99px;padding:7px 14px;font-size:.88rem}
+.chip.on{background:var(--accent);color:var(--on-accent);box-shadow:none}
+.hint{font-size:.88rem;background:var(--container);color:var(--on-container);border-radius:14px;padding:11px 14px;line-height:1.45}
+.help{font-size:.82rem;color:var(--muted);line-height:1.55;margin:0 4px}
+.sec{font-family:var(--display);font-weight:700;font-size:1.05rem;margin:14px 2px 0}
+
+.dialog-wrap{position:fixed;inset:0;background:var(--scrim);z-index:40;display:flex;align-items:center;justify-content:center;padding:20px}
+.dialog{background:var(--bg);border-radius:26px;padding:22px 20px 16px;width:100%;max-width:400px;display:flex;flex-direction:column;gap:10px}
+.dialog h3{margin:0;font-family:var(--display);font-weight:700;font-size:1.2rem}
+.dialog p{margin:0;font-size:.92rem;color:var(--muted);line-height:1.5;white-space:pre-line}
+.dialog .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:6px}
+.dialog .acts button{border:0;background:none;color:var(--accent);font-weight:700;padding:10px 16px;border-radius:99px}
+.dialog .acts button.go{background:var(--accent);color:var(--on-accent)}
+.dialog .acts button.go.danger{background:var(--danger);color:#fff}
+
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 90px);transform:translateX(-50%);background:var(--ink);color:var(--bg);border-radius:14px;padding:12px 16px;font-size:.9rem;display:flex;gap:14px;align-items:center;z-index:60;max-width:calc(100% - 32px);box-shadow:0 6px 20px rgb(0 0 0 / .2)}
+.toast button{border:0;background:none;color:var(--hero-a);font-weight:700;padding:2px}
+.steps{margin:0;padding-left:1.3em;line-height:1.7;font-size:.92rem}
+</style>
+</head>
+<body>
+<div class="page" id="home">
+  <div class="topbar">
+    <h1 id="salonTitle">우리 미용실</h1>
+    <button class="iconbtn" id="btnSettings" aria-label="설정">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84a.47.47 0 0 0-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.48.48 0 0 0-.59.22L2.74 8.87a.47.47 0 0 0 .12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.48.48 0 0 0-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z"/></svg>
+    </button>
+  </div>
+
+  <div class="hero">
+    <span class="k" id="heroDate"></span>
+    <span class="v" id="heroHeadline"></span>
+    <span class="s" id="heroSub"></span>
+  </div>
+
+  <div class="banner" id="installBanner" hidden>
+    <p>홈 화면에 추가하면 앱처럼 아이콘을 눌러 바로 열 수 있어요.</p>
+    <button class="linkbtn" id="btnInstallHow">방법 보기</button>
+    <button class="x" id="btnInstallClose" aria-label="닫기">✕</button>
+  </div>
+  <div class="banner" id="sampleBanner" hidden>
+    <p>지금 보이는 고객은 <b>예시</b>예요. 둘러본 뒤 지워 주세요.</p>
+    <button class="linkbtn" id="btnClearSamples">예시 지우기</button>
+  </div>
+
+  <div class="h">오늘 보낼 알림 <span id="alertCount"></span></div>
+  <div class="list" id="alertList"></div>
+
+  <div class="h">고객 <span id="customerCount"></span></div>
+  <input class="search" id="search" type="search" placeholder="🔍 이름·전화번호 검색" autocomplete="off">
+  <div class="list" id="customerList"></div>
+</div>
+
+<button class="fab" id="fab"><span aria-hidden="true">＋</span> 고객 등록</button>
+
+<script>
+"use strict";
+/* ---------- 저장 ---------- */
+const KEY = "salon.v1";
+const DEFAULT_WEEK = "[{매장}] {이름}님, 안녕하세요. {날짜} {시간} 예약 안내드립니다. 일정 변경이 필요하시면 편하게 연락 주세요.";
+const DEFAULT_DAY = "[{매장}] {이름}님, 오늘 {시간} 예약일입니다. 방문을 기다리겠습니다.";
+let state = { salonName: "우리 미용실", weekTemplate: DEFAULT_WEEK, dayTemplate: DEFAULT_DAY, customers: [] };
+let storageOk = true;
+
+function load() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw) state = Object.assign(state, JSON.parse(raw));
+  } catch (e) { storageOk = false; }
+  if (!Array.isArray(state.customers)) state.customers = [];
+}
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(state)); storageOk = true; }
+  catch (e) { storageOk = false; toast("저장에 실패했어요. 개인정보 보호(시크릿) 모드인지 확인해 주세요."); }
+}
+
+/* ---------- 날짜 ---------- */
+const WD = "일월화수목금토";
+const pad = n => String(n).padStart(2, "0");
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const parse = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+const todayStr = () => ymd(new Date());
+const addDays = (s, n) => { const d = parse(s); d.setDate(d.getDate() + n); return ymd(d); };
+const daysUntil = s => { const a = parse(s), b = parse(todayStr());
+  return Math.round((Date.UTC(a.getFullYear(), a.getMonth(), a.getDate()) - Date.UTC(b.getFullYear(), b.getMonth(), b.getDate())) / 864e5); };
+const pretty = s => { const d = parse(s); return `${d.getMonth() + 1}월 ${d.getDate()}일 (${WD[d.getDay()]})`; };
+const prettyYear = s => { const d = parse(s); return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`; };
+const stamp = ms => { const d = new Date(ms); return `${d.getMonth() + 1}월 ${d.getDate()}일 ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const dLabel = d => d === 0 ? "오늘" : d > 0 ? `D-${d}` : `${-d}일 지남`;
+/** 첫 예약일이 이미 지났으면 주기만큼 더해서 오늘 이후의 첫 예약일을 구한다. */
+function firstUpcoming(first, weeks) { let d = first; const t = todayStr(); while (d < t) d = addDays(d, weeks * 7); return d; }
+
+/* ---------- 알림 ---------- */
+const KIND = { week: "1주일 전 알림", day: "예약일 알림" };
+/** 오늘 보내야 할 알림. 1주일 전 알림은 D-7을 놓쳤더라도 예약 전날까지는 보여 준다. */
+function due(c) {
+  const d = daysUntil(c.nextDate);
+  if (d === 0 && !isSent(c, "day")) return "day";
+  if (d >= 1 && d <= 7 && !isSent(c, "week")) return "week";
+  return null;
+}
+const isSent = (c, k) => (k === "week" ? c.weekSentFor : c.daySentFor) === c.nextDate;
+function markSent(c, k) {
+  const prev = { weekSentFor: c.weekSentFor, weekSentAt: c.weekSentAt, daySentFor: c.daySentFor, daySentAt: c.daySentAt };
+  if (k === "week") { c.weekSentFor = c.nextDate; c.weekSentAt = Date.now(); }
+  else { c.daySentFor = c.nextDate; c.daySentAt = Date.now(); }
+  save();
+  return () => { Object.assign(c, prev); save(); refreshAll(); };
+}
+function message(k, c) {
+  return (k === "week" ? state.weekTemplate : state.dayTemplate)
+    .replaceAll("{매장}", state.salonName).replaceAll("{이름}", c.name)
+    .replaceAll("{날짜}", pretty(c.nextDate)).replaceAll("{시간}", c.time || "")
+    .replace(/ {2,}/g, " ").trim();
+}
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+function smsHref(phone, text) {
+  const num = (phone || "").replace(/[^\d+]/g, "");
+  return `sms:${num}${isIOS ? "&" : "?"}body=${encodeURIComponent(text)}`;
+}
+
+/* ---------- 공통 ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+const find = id => state.customers.find(c => c.id === id);
+const sorted = () => [...state.customers].sort((a, b) => a.nextDate.localeCompare(b.nextDate) || a.name.localeCompare(b.name));
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+function hash(s) { let h = 0; for (const ch of s) h = (h * 31 + ch.codePointAt(0)) | 0; return Math.abs(h); }
+function initial(name) { const n = [...name.trim()]; return n.length === 3 ? n[1] : (n[0] || "?"); }
+const avatar = (name, cls = "") => `<span class="av a${hash(name) % 4} ${cls}" aria-hidden="true">${esc(initial(name))}</span>`;
+function badgeFor(c) {
+  const d = daysUntil(c.nextDate);
+  const cls = d === 0 ? "b-day" : d > 0 && d <= 7 ? "b-week" : d < 0 ? "b-over" : "b-plain";
+  return `<span class="badge ${cls}">${dLabel(d)}</span>`;
+}
+
+let toastTimer;
+function toast(text, undo) {
+  document.querySelector(".toast")?.remove();
+  const t = document.createElement("div");
+  t.className = "toast"; t.setAttribute("role", "status");
+  t.innerHTML = `<span>${esc(text)}</span>${undo ? '<button type="button">되돌리기</button>' : ""}`;
+  if (undo) t.querySelector("button").onclick = () => { undo(); t.remove(); toast("되돌렸어요"); };
+  document.body.appendChild(t);
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.remove(), undo ? 6000 : 2600);
+}
+
+function confirmBox({ title, msg, ok = "확인", danger = false, onOk }) {
+  const w = document.createElement("div");
+  w.className = "dialog-wrap";
+  w.innerHTML = `<div class="dialog" role="dialog" aria-modal="true"><h3>${esc(title)}</h3>${msg ? `<p>${esc(msg)}</p>` : ""}
+    <div class="acts"><button type="button" data-a="no">취소</button><button type="button" class="go ${danger ? "danger" : ""}" data-a="ok">${esc(ok)}</button></div></div>`;
+  w.addEventListener("click", e => {
+    const a = e.target.dataset.a;
+    if (e.target === w || a === "no") w.remove();
+    if (a === "ok") { w.remove(); onOk(); }
+  });
+  document.body.appendChild(w);
+  w.querySelector(".go").focus();
+}
+
+/* ---------- 새 창(시트) 관리: 휴대폰 뒤로가기 버튼으로도 닫힌다 ---------- */
+const stack = [];
+const BACK_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>';
+function openSheet(title, html, mount, refresh) {
+  const s = document.createElement("section");
+  s.className = "sheet"; s.setAttribute("role", "dialog"); s.setAttribute("aria-label", title);
+  s.innerHTML = `<header><button class="back" type="button" aria-label="뒤로">${BACK_SVG}</button><h2>${esc(title)}</h2></header>
+    <div class="body"><div class="inner">${html}</div></div>`;
+  s.querySelector(".back").onclick = () => history.back();
+  document.body.appendChild(s);
+  stack.push({ el: s, refresh });
+  history.pushState({ sheet: stack.length }, "");
+  requestAnimationFrame(() => requestAnimationFrame(() => s.classList.add("open")));
+  mount?.(s);
+  return s;
+}
+function popSheet() {
+  const top = stack.pop();
+  if (!top) return;
+  top.el.classList.remove("open");
+  setTimeout(() => top.el.remove(), 280);
+  refreshAll();
+}
+window.addEventListener("popstate", popSheet);
+const closeSheet = () => history.back();
+function refreshAll() { renderHome(); for (const s of stack) s.refresh?.(); }
+
+/* ---------- 메인 화면 ---------- */
+function renderHome() {
+  $("#salonTitle").textContent = state.salonName;
+  document.title = state.salonName + " · 예약";
+  const now = new Date();
+  const days = state.customers.map(c => daysUntil(c.nextDate));
+  $("#heroDate").textContent = `${now.getMonth() + 1}월 ${now.getDate()}일 ${WD[now.getDay()]}요일 · 이번 주 예약 ${days.filter(d => d >= 0 && d <= 6).length}명`;
+  $("#heroHeadline").textContent = `오늘 예약 ${days.filter(d => d === 0).length}명`;
+  const dueList = sorted().map(c => [c, due(c)]).filter(x => x[1]);
+  $("#heroSub").textContent = dueList.length ? `💌 오늘 보낼 알림 문자 ${dueList.length}건이 있어요` : state.customers.length ? "✓ 오늘 보낼 알림 문자가 없어요" : "첫 고객을 등록해 보세요";
+  $("#sampleBanner").hidden = !state.customers.some(c => c.sample);
+
+  $("#alertCount").textContent = `${dueList.length}건`;
+  $("#alertList").innerHTML = dueList.length ? dueList.map(([c, k]) => `
+    <div class="alert-row">
+      <button class="card" type="button" data-open="${c.id}">${avatar(c.name)}
+        <span class="l"><span class="n">${esc(c.name)}</span><span class="s" style="display:block">${esc(c.phone)}</span></span>
+        <span class="r"><span class="badge ${k === "day" ? "b-day" : "b-week"}">${KIND[k]}</span>${pretty(c.nextDate)}</span>
+      </button>
+      <a class="send" href="${esc(smsHref(c.phone, message(k, c)))}" data-sent="${c.id}" data-kind="${k}">💌 문자 보내기</a>
+    </div>`).join("") : `<div class="empty">오늘 보낼 알림이 없어요.</div>`;
+
+  const q = $("#search").value.trim(), digits = q.replace(/\D/g, "");
+  const list = sorted().filter(c => !q || c.name.includes(q) || (digits && c.phone.replace(/\D/g, "").includes(digits)));
+  $("#customerCount").textContent = `${state.customers.length}명`;
+  $("#customerList").innerHTML = list.length ? list.map(c => `
+    <button class="card" type="button" data-open="${c.id}">${avatar(c.name)}
+      <span class="l"><span class="n">${esc(c.name)}</span><span class="s" style="display:block">${esc(c.memo ? c.memo.split("\n")[0] : c.phone)} · ${c.cycleWeeks}주마다</span></span>
+      <span class="r">${badgeFor(c)}${pretty(c.nextDate)}</span>
+    </button>`).join("")
+    : state.customers.length ? `<div class="empty">검색 결과가 없어요.</div>`
+    : `<div class="empty">아직 등록된 고객이 없어요.<br>아래 <b>＋ 고객 등록</b>을 눌러 첫 고객을 등록하거나,
+       <button class="linkbtn" type="button" id="btnSamples">예시 고객으로 둘러보기</button></div>`;
+}
+
+document.addEventListener("click", e => {
+  const sent = e.target.closest("[data-sent]");
+  if (sent) {   // 문자앱이 열리는 순간 보냄으로 표시 (잘못 눌렀으면 되돌리기)
+    const c = find(sent.dataset.sent);
+    if (c) { const undo = markSent(c, sent.dataset.kind); setTimeout(() => { refreshAll(); toast(`${c.name}님 ${KIND[sent.dataset.kind]}을 보냄으로 표시했어요`, undo); }, 400); }
+    return;
+  }
+  const open = e.target.closest("[data-open]");
+  if (open) { openDetail(open.dataset.open); return; }
+  if (e.target.id === "btnSamples") addSamples();
+});
+$("#search").addEventListener("input", renderHome);
+$("#fab").onclick = () => openEdit(null);
+$("#btnSettings").onclick = openSettings;
+$("#btnClearSamples").onclick = () => confirmBox({ title: "예시 고객을 지울까요?", msg: "직접 등록한 고객은 그대로 남아요.", ok: "지우기",
+  onOk: () => { state.customers = state.customers.filter(c => !c.sample); save(); renderHome(); toast("예시 고객을 지웠어요"); } });
+
+function addSamples() {
+  const t = todayStr();
+  const mk = (name, phone, next, weeks, time, memo, visits) => ({ id: uid(), sample: true, name, phone, firstDate: addDays(next, -weeks * 7 * visits.length), cycleWeeks: weeks,
+    nextDate: next, time, memo, weekSentFor: "", weekSentAt: 0, daySentFor: "", daySentAt: 0, visits: visits.map(n => addDays(next, -weeks * 7 * n)) });
+  state.customers.push(
+    mk("김서연", "010-0000-0001", t, 4, "11:00", "뿌리염색", [1, 2]),
+    mk("박지훈", "010-0000-0002", addDays(t, 7), 6, "14:00", "투블럭 커트, 옆머리 짧게", [1]),
+    mk("이민정", "010-0000-0003", addDays(t, 16), 8, "", "펌", [1, 2, 3]),
+  );
+  save(); renderHome();
+}
+
+/* ---------- 고객 상세 ---------- */
+function openDetail(id) {
+  const c0 = find(id); if (!c0) return;
+  let s;
+  const statusOf = (c, k) => {
+    if (isSent(c, k)) return `<div class="st ok">✓ ${stamp(k === "week" ? c.weekSentAt : c.daySentAt)} 보냄</div>`;
+    const d = daysUntil(c.nextDate);
+    if (d < 0) return `<div class="st">예약일이 지났어요</div>`;
+    const when = k === "week" ? (d <= 7 ? "오늘" : pretty(addDays(c.nextDate, -7))) : (d === 0 ? "오늘" : pretty(c.nextDate));
+    return `<div class="st">아직 안 보냄 · ${when} 보낼 차례</div>`;
+  };
+  const render = () => {
+    const c = find(id);
+    if (!c) { closeSheet(); return; }
+    const d = daysUntil(c.nextDate);
+    s.querySelector(".inner").innerHTML = `
+      <div class="prof">${avatar(c.name)}<div class="big">${esc(c.name)}</div><a href="tel:${esc(c.phone.replace(/[^\d+]/g, ""))}">${esc(c.phone)} 📞</a></div>
+      <dl class="info">
+        <dt>다음 예약</dt><dd>${pretty(c.nextDate)}${c.time ? " " + esc(c.time) : ""} · <b>${dLabel(d)}</b></dd>
+        <dt>주기</dt><dd>${c.cycleWeeks}주마다</dd>
+        <dt>첫 예약</dt><dd>${prettyYear(c.firstDate)}</dd>
+        <dt>메모</dt><dd>${esc(c.memo || "-")}</dd>
+      </dl>
+      <button class="btn fill" type="button" data-act="week">💌 1주일 전 알림 문자 보내기</button>${statusOf(c, "week")}
+      <button class="btn tonal" type="button" data-act="day">💌 예약일 알림 문자 보내기</button>${statusOf(c, "day")}
+      <button class="btn out" type="button" data-act="visit">✨ 방문 완료 · 다음 예약 잡기</button>
+      <button class="btn out" type="button" data-act="cal">📅 휴대폰 캘린더에 알림 등록</button>
+      <div class="row2"><button class="btn out" type="button" data-act="edit">수정</button><button class="btn danger" type="button" data-act="del">삭제</button></div>
+      ${c.visits?.length ? `<div class="sec">방문 기록</div><p class="help">${c.visits.map(pretty).join(" · ")}</p>` : ""}`;
+  };
+  s = openSheet("고객 정보", "", el => el.addEventListener("click", e => {
+    const a = e.target.closest("[data-act]")?.dataset.act, c = find(id);
+    if (!a || !c) return;
+    if (a === "week" || a === "day") openSend(c.id, a);
+    if (a === "visit") openVisit(c.id);
+    if (a === "cal") addToCalendar(c);
+    if (a === "edit") openEdit(c.id);
+    if (a === "del") confirmBox({ title: `${c.name}님을 삭제할까요?`, msg: "고객 정보와 방문 기록이 모두 지워져요.", ok: "삭제", danger: true,
+      onOk: () => { state.customers = state.customers.filter(x => x.id !== c.id); save(); closeSheet(); toast("삭제했어요"); } });
+  }), () => render());
+  render();
+}
+
+/* ---------- 문자 보내기 창 ---------- */
+function openSend(id, k) {
+  const c = find(id);
+  const already = isSent(c, k) ? `<div class="hint">이미 ${stamp(k === "week" ? c.weekSentAt : c.daySentAt)}에 보낸 알림이에요. 한 번 더 보낼 수 있어요.</div>` : "";
+  openSheet(`${KIND[k]} 문자`, `
+    <div class="card" style="cursor:default">${avatar(c.name)}<span class="l"><span class="n">${esc(c.name)}님께</span><span class="s" style="display:block">${esc(c.phone)}</span></span></div>
+    ${already}
+    <div class="field"><label for="msg">보낼 내용 (고쳐도 돼요)</label><textarea id="msg" rows="5">${esc(message(k, c))}</textarea></div>
+    <a class="btn fill" id="go" href="#">💌 문자앱 열기</a>
+    <p class="help">문자앱이 내용이 채워진 채로 열려요. 문자앱에서 <b>전송</b>을 누르면 발송이 끝나요.</p>`, s => {
+    const ta = s.querySelector("#msg"), go = s.querySelector("#go");
+    const upd = () => go.href = smsHref(c.phone, ta.value);
+    ta.addEventListener("input", upd); upd();
+    go.addEventListener("click", () => {
+      const undo = markSent(c, k);
+      setTimeout(() => { closeSheet(); toast(`${c.name}님 ${KIND[k]}을 보냄으로 표시했어요`, undo); }, 500);
+    });
+  });
+}
+
+/* ---------- 방문 완료 ---------- */
+function openVisit(id) {
+  const c = find(id);
+  openSheet("방문 완료", `
+    <div class="field"><label for="vdate">방문한 날짜</label><input id="vdate" type="date" value="${todayStr()}"></div>
+    <div class="hint" id="vprev"></div>
+    <button class="btn fill" type="button" id="vok">확인 · 다음 예약 잡기</button>`, s => {
+    const inp = s.querySelector("#vdate"), prev = s.querySelector("#vprev");
+    const upd = () => prev.textContent = inp.value
+      ? `${pretty(inp.value)} 방문으로 기록하고, 다음 예약일을 ${pretty(addDays(inp.value, c.cycleWeeks * 7))} (${c.cycleWeeks}주 뒤)로 잡아요.`
+      : "방문한 날짜를 골라 주세요.";
+    inp.addEventListener("input", upd); upd();
+    s.querySelector("#vok").onclick = () => {
+      if (!inp.value) return;
+      c.visits = [inp.value, ...(c.visits || [])];
+      c.nextDate = addDays(inp.value, c.cycleWeeks * 7);
+      save(); closeSheet(); toast(`다음 예약일을 ${pretty(c.nextDate)}로 잡았어요`);
+    };
+  });
+}
+
+/* ---------- 고객 등록·수정 ---------- */
+function openEdit(id) {
+  const e = id ? find(id) : null;
+  const v = e || { name: "", phone: "", firstDate: todayStr(), nextDate: todayStr(), cycleWeeks: 4, time: "", memo: "" };
+  openSheet(e ? "고객 수정" : "고객 등록", `
+    <div class="field" data-f="name"><label for="fName">이름</label><input id="fName" autocomplete="off" value="${esc(v.name)}"></div>
+    <div class="field" data-f="phone"><label for="fPhone">전화번호</label><input id="fPhone" type="tel" inputmode="tel" autocomplete="off" placeholder="010-0000-0000" value="${esc(v.phone)}"></div>
+    <div class="row2">
+      <div class="field"><label for="fFirst">첫 예약날짜</label><input id="fFirst" type="date" value="${v.firstDate}"></div>
+      <div class="field"><label for="fTime">예약 시간 (선택)</label><input id="fTime" type="time" value="${esc(v.time)}"></div>
+    </div>
+    <div class="field" data-f="cycle"><label for="fCycle">주기</label><div class="with-suf"><input id="fCycle" type="number" inputmode="numeric" min="1" max="52" value="${v.cycleWeeks}"><span class="suf">주마다</span></div></div>
+    <div class="chips">${[3, 4, 5, 6, 8].map(w => `<button class="chip" type="button" data-w="${w}">${w}주</button>`).join("")}</div>
+    <div class="hint" id="fPrev"></div>
+    ${e ? `<div class="field"><label for="fNext">다음 예약일</label><input id="fNext" type="date" value="${v.nextDate}"></div>` : ""}
+    <div class="field"><label for="fMemo">메모 (선택)</label><textarea id="fMemo" rows="3" placeholder="시술 내용, 취향 등">${esc(v.memo)}</textarea></div>
+    <div class="errmsg" id="fErr" hidden></div>
+    <button class="btn fill" type="button" id="fSave">저장</button>`, s => {
+    const q = sel => s.querySelector(sel);
+    const weeks = () => { const n = parseInt(q("#fCycle").value, 10); return n >= 1 && n <= 52 ? n : null; };
+    const upd = () => {
+      const w = weeks();
+      s.querySelectorAll(".chip").forEach(b => b.classList.toggle("on", +b.dataset.w === w));
+      if (!w) { q("#fPrev").textContent = "주기는 1~52주 사이 숫자로 입력해 주세요."; return; }
+      if (e) { q("#fPrev").textContent = "다음 예약일은 아래 ‘다음 예약일’ 칸에서 바꿀 수 있어요."; return; }
+      const f = q("#fFirst").value;
+      if (!f) { q("#fPrev").textContent = "첫 예약날짜를 골라 주세요."; return; }
+      const first = firstUpcoming(f, w);
+      q("#fPrev").textContent = `첫 예약 ${pretty(first)} → 그다음 ${pretty(addDays(first, w * 7))} (${w}주 뒤)`;
+    };
+    s.querySelectorAll(".chip").forEach(b => b.onclick = () => { q("#fCycle").value = b.dataset.w; upd(); });
+    q("#fCycle").addEventListener("input", upd); q("#fFirst").addEventListener("input", upd); upd();
+    q("#fSave").onclick = () => {
+      const name = q("#fName").value.trim(), phone = q("#fPhone").value.trim(), w = weeks(), first = q("#fFirst").value;
+      const bad = { name: !name, phone: phone.replace(/\D/g, "").length < 9, cycle: !w };
+      Object.entries(bad).forEach(([f, b]) => q(`[data-f="${f}"]`).classList.toggle("err", b));
+      const msgs = [bad.name && "이름을 입력해 주세요", bad.phone && "전화번호를 확인해 주세요", bad.cycle && "주기를 1~52 사이로 입력해 주세요", !first && "첫 예약날짜를 골라 주세요"].filter(Boolean);
+      q("#fErr").hidden = !msgs.length; q("#fErr").textContent = msgs.join(" · ");
+      if (msgs.length) return;
+      const data = { name, phone, firstDate: first, cycleWeeks: w, time: q("#fTime").value, memo: q("#fMemo").value.trim() };
+      if (e) Object.assign(e, data, { nextDate: q("#fNext").value || e.nextDate });
+      else state.customers.push({ id: uid(), ...data, nextDate: firstUpcoming(first, w), weekSentFor: "", weekSentAt: 0, daySentFor: "", daySentAt: 0, visits: [] });
+      save(); closeSheet(); toast(e ? "수정했어요" : `${name}님을 등록했어요`);
+    };
+    if (!e) setTimeout(() => q("#fName").focus(), 300);
+  });
+}
+
+/* ---------- 캘린더 알림 (.ics): 휴대폰 캘린더가 1주일 전·당일에 알려 준다 ---------- */
+function addToCalendar(c) {
+  const d = c.nextDate.replaceAll("-", ""), end = addDays(c.nextDate, 1).replaceAll("-", "");
+  const now = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
+  const text = s => s.replace(/[\\,;]/g, m => "\\" + m).replace(/\n/g, "\\n");
+  const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//salon-web//KO", "CALSCALE:GREGORIAN", "BEGIN:VEVENT",
+    `UID:${c.id}-${d}@salon-web`, `DTSTAMP:${now}`, `DTSTART;VALUE=DATE:${d}`, `DTEND;VALUE=DATE:${end}`,
+    `SUMMARY:${text(`${c.name}님 예약${c.time ? " " + c.time : ""}`)}`,
+    `DESCRIPTION:${text(`${state.salonName} 예약 앱에서 알림 문자를 보내 주세요.\n${c.phone}`)}`,
+    "BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${text(`${c.name}님 1주일 전 알림 문자 보내기`)}`, "TRIGGER:-P6DT14H", "END:VALARM",
+    "BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${text(`${c.name}님 예약일 알림 문자 보내기`)}`, "TRIGGER:PT9H", "END:VALARM",
+    "END:VEVENT", "END:VCALENDAR"].join("\r\n");
+  download(new File([ics], `${c.name}-예약.ics`, { type: "text/calendar" }),
+    "캘린더 파일을 열고 ‘추가’를 누르면, 예약 1주일 전 오전 10시와 당일 오전 9시에 휴대폰이 알려 줘요.");
+}
+
+/** 휴대폰에서는 공유 창(파일에 저장·카카오톡 등)을 먼저 띄우고, 안 되면 내려받는다. */
+async function shareOrDownload(file, after) {
+  if (navigator.canShare?.({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: file.name }); if (after) toast(after); return; }
+    catch (e) { if (e.name === "AbortError") return; }
+  }
+  download(file, after);
+}
+function download(file, after) {
+  const url = URL.createObjectURL(file);
+  const a = document.createElement("a");
+  a.href = url; a.download = file.name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+  if (after) toast(after);
+}
+
+/* ---------- 설정 ---------- */
+function openSettings() {
+  openSheet("설정", `
+    <div class="field"><label for="sName">매장 이름</label><input id="sName" value="${esc(state.salonName)}"></div>
+    <div class="sec">문자 문구</div>
+    <p class="help">{이름} {날짜} {시간} {매장} 자리에 고객 정보가 들어가요.</p>
+    <div class="field"><label for="sWeek">1주일 전 알림 문구</label><textarea id="sWeek" rows="4">${esc(state.weekTemplate)}</textarea></div>
+    <div class="field"><label for="sDay">예약일 알림 문구</label><textarea id="sDay" rows="3">${esc(state.dayTemplate)}</textarea></div>
+    <button class="linkbtn" type="button" id="sReset" style="align-self:flex-start">기본 문구로 되돌리기</button>
+    <button class="btn fill" type="button" id="sSave">설정 저장</button>
+
+    <div class="sec">데이터 백업</div>
+    <p class="help">고객 정보는 이 휴대폰 안에만 저장돼요. 휴대폰을 바꾸거나 브라우저 데이터를 지우기 전에 백업 파일을 저장해 두세요.</p>
+    <div class="row2"><button class="btn out" type="button" id="sExport">백업 저장</button><button class="btn out" type="button" id="sImport">백업 불러오기</button></div>
+    <input type="file" id="sFile" accept=".json,application/json" hidden>
+
+    <div class="sec">홈 화면에 추가</div>
+    <button class="btn out" type="button" id="sHow">방법 보기</button>
+
+    <div class="sec">초기화</div>
+    <button class="btn danger" type="button" id="sWipe">모든 데이터 지우기</button>`, s => {
+    const q = sel => s.querySelector(sel);
+    q("#sReset").onclick = () => { q("#sWeek").value = DEFAULT_WEEK; q("#sDay").value = DEFAULT_DAY; };
+    q("#sSave").onclick = () => {
+      state.salonName = q("#sName").value.trim() || "우리 미용실";
+      state.weekTemplate = q("#sWeek").value.trim() || DEFAULT_WEEK;
+      state.dayTemplate = q("#sDay").value.trim() || DEFAULT_DAY;
+      save(); closeSheet(); toast("저장했어요");
+    };
+    q("#sExport").onclick = () => shareOrDownload(
+      new File([JSON.stringify({ app: "salon-web", version: 1, savedAt: new Date().toISOString(), ...state }, null, 2)], `미용실예약-백업-${todayStr()}.json`, { type: "application/json" }),
+      "백업 파일을 저장했어요. 카카오톡 ‘나와의 채팅’이나 클라우드에도 보관해 두세요.");
+    q("#sImport").onclick = () => q("#sFile").click();
+    q("#sFile").onchange = async ev => {
+      const f = ev.target.files[0]; ev.target.value = "";
+      if (!f) return;
+      let data;
+      try { data = JSON.parse(await f.text()); if (!Array.isArray(data.customers)) throw 0; }
+      catch { toast("백업 파일을 읽을 수 없어요"); return; }
+      confirmBox({ title: "백업 불러오기", msg: `고객 ${data.customers.length}명이 들어 있는 백업으로 바꿔요.\n지금 있는 데이터는 지워져요.`, ok: "불러오기",
+        onOk: () => {
+          state = { salonName: data.salonName || "우리 미용실", weekTemplate: data.weekTemplate || DEFAULT_WEEK, dayTemplate: data.dayTemplate || DEFAULT_DAY, customers: data.customers };
+          save(); closeSheet(); toast(`고객 ${data.customers.length}명을 불러왔어요`);
+        } });
+    };
+    q("#sHow").onclick = openInstallHow;
+    q("#sWipe").onclick = () => confirmBox({ title: "모든 데이터를 지울까요?", msg: "고객 정보와 설정이 모두 지워지고 되돌릴 수 없어요.\n먼저 백업을 저장해 두는 걸 권해요.", ok: "모두 지우기", danger: true,
+      onOk: () => { state = { salonName: "우리 미용실", weekTemplate: DEFAULT_WEEK, dayTemplate: DEFAULT_DAY, customers: [] }; save(); closeSheet(); toast("모든 데이터를 지웠어요"); } });
+  });
+}
+
+/* ---------- 홈 화면에 추가 안내 ---------- */
+let installEvt = null;
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvt = e; });
+const standalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+function openInstallHow() {
+  const android = `<ol class="steps"><li>크롬 또는 삼성 인터넷으로 이 페이지를 엽니다.</li><li>오른쪽 위 <b>⋮</b> (삼성 인터넷은 아래 <b>☰</b>) 메뉴를 누릅니다.</li><li><b>홈 화면에 추가</b> 또는 <b>앱 설치</b>를 누릅니다.</li></ol>`;
+  const ios = `<ol class="steps"><li><b>사파리</b>로 이 페이지를 엽니다.</li><li>아래쪽 <b>공유 버튼</b>(네모에 위쪽 화살표)을 누릅니다.</li><li><b>홈 화면에 추가</b>를 누르고 오른쪽 위 <b>추가</b>를 누릅니다.</li></ol>`;
+  openSheet("홈 화면에 추가", `
+    ${installEvt ? `<button class="btn fill" type="button" id="iNow">지금 바로 설치하기</button>` : ""}
+    <div class="sec">${isIOS ? "아이폰" : "안드로이드(갤럭시)"}</div>${isIOS ? ios : android}
+    <div class="sec">${isIOS ? "안드로이드(갤럭시)" : "아이폰"}</div>${isIOS ? android : ios}
+    <p class="help">추가하고 나면 홈 화면의 <b>미용실 예약</b> 아이콘으로 열어 주세요. 인터넷이 잠깐 안 돼도 열려요.</p>`, s => {
+    const b = s.querySelector("#iNow");
+    if (b) b.onclick = async () => { installEvt.prompt(); await installEvt.userChoice; installEvt = null; closeSheet(); };
+  });
+}
+$("#btnInstallHow").onclick = openInstallHow;
+$("#btnInstallClose").onclick = () => { $("#installBanner").hidden = true; try { localStorage.setItem("salon.hideInstall", "1"); } catch {} };
+
+/* ---------- 시작 ---------- */
+load();
+renderHome();
+try { $("#installBanner").hidden = standalone() || localStorage.getItem("salon.hideInstall") === "1"; } catch { $("#installBanner").hidden = standalone(); }
+navigator.storage?.persist?.().catch(() => {});
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+// 날짜가 바뀌거나 다른 앱에서 돌아오면 다시 그린다
+document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshAll(); });
+</script>
+</body>
+</html>
