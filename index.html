@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light only">
 <title>미용실 예약</title>
 <meta name="description" content="로그인 없이 쓰는 미용실 예약·알림 문자 관리">
 <meta name="theme-color" content="#2563EB" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#1D4ED8" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#2563EB" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -37,20 +38,7 @@
   --body:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
   color-scheme:light;
 }
-@media (prefers-color-scheme:dark){:root{
-  --bg:#14151f; --bg-grad:linear-gradient(180deg,#161a2c 0%,#14151f 60%);
-  --surface:#1f2030; --ink:#e8e8f6; --muted:#a2a2bb; --line:#30324a;
-  --accent:#a5b4fc; --on-accent:#1e1b6b; --container:#312e81; --on-container:#e0e7ff;
-  --head:linear-gradient(120deg,#1d4ed8,#4338ca); --head-shadow:rgb(0 0 0 / .3);
-  --grad:linear-gradient(120deg,#2563eb,#4f46e5); --grad-shadow:rgb(0 0 0 / .3);
-  --sms:linear-gradient(120deg,#ea580c,#dc2626); --sms-shadow:rgb(0 0 0 / .3);
-  --sms-week:linear-gradient(120deg,#9333ea,#7e22ce); --sms-week-shadow:rgb(0 0 0 / .3);
-  --hero:linear-gradient(120deg,#16a34a,#15803d); --hero-ink:#fff; --hero-shadow:none; --hero-a:#bbf7d0;
-  --week-bg:#3b2350; --week-fg:#e9d5ff; --day-bg:#4a2a14; --day-fg:#fdba74;
-  --plain-bg:#2a2d55; --plain-fg:#c7d2fe; --over-bg:#2c2d3e; --over-fg:#c5c6d8;
-  --danger:#ffb4ab; --ok:#86efac; --scrim:rgb(0 0 0 / .55);
-  --av1:#4a2a14; --av2:#3b2350; --av3:#2a2d55; --av4:#173a26; --av-ink:#f0f0fb;
-  --shadow:none; color-scheme:dark}}
+/* 휴대폰이 어두운 모드여도 항상 밝은 화면으로 보여 준다 */
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;-webkit-text-size-adjust:100%}
 body{min-height:100dvh;overscroll-behavior-y:none}
