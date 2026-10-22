@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>미용실 예약</title>
 <meta name="description" content="로그인 없이 쓰는 미용실 예약·알림 문자 관리">
-<meta name="theme-color" content="#EC4899" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#BE185D" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#2563EB" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1D4ED8" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -18,34 +18,36 @@
 <link rel="preload" href="gowun-batang-bold.woff2" as="font" type="font/woff2" crossorigin>
 <style>
 @font-face{font-family:"Gowun Batang";font-weight:700;font-display:swap;src:url(gowun-batang-bold.woff2) format("woff2")}
-/* 선명한 그라데이션: 분홍→보라 머리띠와 버튼, 주황→분홍 오늘 카드, 연보라→연분홍 바탕 */
+/* 컬러풀: 파랑→남색 머리띠와 저장 버튼, 초록 오늘 카드, 주홍 문자 버튼, 블루그레이 바탕 */
 :root{
-  --bg:#fbf0f5; --bg-grad:linear-gradient(180deg,#f6eef9 0%,#fdf0f4 55%,#fff7f3 100%);
-  --surface:#fff; --ink:#2a1a24; --muted:#87707a; --line:#f0dfe4;
-  --accent:#db2777; --on-accent:#fff; --container:#fce7f3; --on-container:#831843;
-  --head:linear-gradient(120deg,#ec4899,#a855f7); --head-shadow:rgb(168 85 247 / .28);
-  --grad:linear-gradient(120deg,#ec4899,#a855f7); --grad-shadow:rgb(219 39 119 / .3);
-  --hero:linear-gradient(120deg,#f97316,#ec4899); --hero-ink:#fff; --hero-shadow:0 8px 22px rgb(236 72 153 / .3); --hero-a:#ffd1e0;
-  --week-bg:#ede3f7; --week-fg:#5b3f78; --day-bg:#ffe0d1; --day-fg:#8a3a17;
-  --plain-bg:#f6eaee; --plain-fg:#6a4a52; --over-bg:#efe6e8; --over-fg:#5e4b50;
-  --danger:#ba1a1a; --ok:#2f8f63; --scrim:rgb(43 28 33 / .42);
-  --av1:#ffd9e2; --av2:#ede3f7; --av3:#ffe0d1; --av4:#dff1ea; --av-ink:#4a2a35;
-  --shadow:0 3px 12px rgb(120 60 140 / .08);
+  --bg:#f0f1fa; --bg-grad:linear-gradient(180deg,#eceff9 0%,#f3f1fb 55%,#f9f7fd 100%);
+  --surface:#fff; --ink:#1f1d33; --muted:#6c6a86; --line:#e3e4f2;
+  --accent:#4f46e5; --on-accent:#fff; --container:#e0e7ff; --on-container:#1e1b6b;
+  --head:linear-gradient(120deg,#2563eb,#4f46e5); --head-shadow:rgb(79 70 229 / .28);
+  --grad:linear-gradient(120deg,#2563eb,#4f46e5); --grad-shadow:rgb(79 70 229 / .3);
+  --sms:linear-gradient(120deg,#f97316,#ef4444); --sms-shadow:rgb(239 68 68 / .3);
+  --hero:linear-gradient(120deg,#22c55e,#16a34a); --hero-ink:#fff; --hero-shadow:0 8px 22px rgb(22 163 74 / .3); --hero-a:#bbf7d0;
+  --week-bg:#f3e8ff; --week-fg:#6b21a8; --day-bg:#ffedd5; --day-fg:#9a3412;
+  --plain-bg:#e0e7ff; --plain-fg:#3730a3; --over-bg:#e9e9f1; --over-fg:#4b4b63;
+  --danger:#ba1a1a; --ok:#15803d; --scrim:rgb(31 29 51 / .42);
+  --av1:#ffedd5; --av2:#f3e8ff; --av3:#e0e7ff; --av4:#dcfce7; --av-ink:#2e2a4a;
+  --shadow:0 3px 12px rgb(60 60 140 / .08);
   --display:"Gowun Batang","AppleMyungjo","Nanum Myeongjo",serif;
   --body:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){:root{
-  --bg:#1c1316; --bg-grad:linear-gradient(180deg,#221520 0%,#1c1316 60%);
-  --surface:#271c20; --ink:#f3e3e7; --muted:#b39aa3; --line:#3a2a30;
-  --accent:#ffb1c6; --on-accent:#65002e; --container:#5b2238; --on-container:#ffd9e2;
-  --head:linear-gradient(120deg,#be185d,#7e22ce); --head-shadow:rgb(0 0 0 / .3);
-  --grad:linear-gradient(120deg,#db2777,#9333ea); --grad-shadow:rgb(0 0 0 / .3);
-  --hero:linear-gradient(120deg,#c2410c,#be185d); --hero-ink:#fff; --hero-shadow:none; --hero-a:#ffd1e0;
-  --week-bg:#3a2d4a; --week-fg:#dcc6f5; --day-bg:#4d2b1d; --day-fg:#ffb998;
-  --plain-bg:#33252a; --plain-fg:#dcc0c8; --over-bg:#3a3033; --over-fg:#d5c9c7;
-  --danger:#ffb4ab; --ok:#7fd8a8; --scrim:rgb(0 0 0 / .55);
-  --av1:#5b2238; --av2:#3a2d4a; --av3:#4d2b1d; --av4:#21382f; --av-ink:#ffe4ea;
+  --bg:#14151f; --bg-grad:linear-gradient(180deg,#161a2c 0%,#14151f 60%);
+  --surface:#1f2030; --ink:#e8e8f6; --muted:#a2a2bb; --line:#30324a;
+  --accent:#a5b4fc; --on-accent:#1e1b6b; --container:#312e81; --on-container:#e0e7ff;
+  --head:linear-gradient(120deg,#1d4ed8,#4338ca); --head-shadow:rgb(0 0 0 / .3);
+  --grad:linear-gradient(120deg,#2563eb,#4f46e5); --grad-shadow:rgb(0 0 0 / .3);
+  --sms:linear-gradient(120deg,#ea580c,#dc2626); --sms-shadow:rgb(0 0 0 / .3);
+  --hero:linear-gradient(120deg,#16a34a,#15803d); --hero-ink:#fff; --hero-shadow:none; --hero-a:#bbf7d0;
+  --week-bg:#3b2350; --week-fg:#e9d5ff; --day-bg:#4a2a14; --day-fg:#fdba74;
+  --plain-bg:#2a2d55; --plain-fg:#c7d2fe; --over-bg:#2c2d3e; --over-fg:#c5c6d8;
+  --danger:#ffb4ab; --ok:#86efac; --scrim:rgb(0 0 0 / .55);
+  --av1:#4a2a14; --av2:#3b2350; --av3:#2a2d55; --av4:#173a26; --av-ink:#f0f0fb;
   --shadow:none; color-scheme:dark}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;-webkit-text-size-adjust:100%}
@@ -95,7 +97,7 @@ a{color:inherit}
 .b-over{background:var(--over-bg);color:var(--over-fg)}
 .alert-row{display:flex;flex-direction:column;gap:0;background:var(--surface);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
 .alert-row .card{box-shadow:none;border-radius:0}
-.alert-row .send{display:flex;align-items:center;justify-content:center;gap:6px;margin:0 12px 12px;padding:11px;border-radius:99px;background:var(--grad);color:#fff;box-shadow:0 4px 12px var(--grad-shadow);font-weight:700;text-decoration:none;font-size:.92rem}
+.alert-row .send{display:flex;align-items:center;justify-content:center;gap:6px;margin:0 12px 12px;padding:11px;border-radius:99px;background:var(--sms);color:#fff;box-shadow:0 4px 12px var(--sms-shadow);font-weight:700;text-decoration:none;font-size:.92rem}
 
 .search{width:100%;border:0;border-radius:99px;background:var(--surface);box-shadow:var(--shadow);padding:12px 18px;font-size:.95rem;margin-bottom:10px;outline-offset:0}
 .search::placeholder{color:var(--muted)}
@@ -124,6 +126,7 @@ a{color:inherit}
 
 .btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;border:0;border-radius:99px;padding:14px 16px;font-weight:700;font-size:.97rem;text-decoration:none;text-align:center}
 .btn.fill{background:var(--grad);color:#fff;box-shadow:0 4px 12px var(--grad-shadow)}
+.btn.sms{background:var(--sms);color:#fff;box-shadow:0 4px 12px var(--sms-shadow)}
 .btn.tonal{background:var(--container);color:var(--on-container)}
 .btn.out{background:var(--surface);color:var(--accent);box-shadow:inset 0 0 0 1px var(--line)}
 .btn.danger{background:var(--surface);color:var(--danger);box-shadow:inset 0 0 0 1px var(--line)}
@@ -417,8 +420,8 @@ function openDetail(id) {
         <dt>첫 예약</dt><dd>${prettyYear(c.firstDate)}</dd>
         <dt>메모</dt><dd>${esc(c.memo || "-")}</dd>
       </dl>
-      <button class="btn fill" type="button" data-act="week">💌 1주일 전 알림 문자 보내기</button>${statusOf(c, "week")}
-      <button class="btn tonal" type="button" data-act="day">💌 예약일 알림 문자 보내기</button>${statusOf(c, "day")}
+      <button class="btn sms" type="button" data-act="week">💌 1주일 전 알림 문자 보내기</button>${statusOf(c, "week")}
+      <button class="btn sms" type="button" data-act="day">💌 예약일 알림 문자 보내기</button>${statusOf(c, "day")}
       <button class="btn out" type="button" data-act="visit">✨ 방문 완료 · 다음 예약 잡기</button>
       <button class="btn out" type="button" data-act="cal">📅 휴대폰 캘린더에 알림 등록</button>
       <div class="row2"><button class="btn out" type="button" data-act="edit">수정</button><button class="btn danger" type="button" data-act="del">삭제</button></div>
@@ -445,7 +448,7 @@ function openSend(id, k) {
     <div class="card" style="cursor:default">${avatar(c.name)}<span class="l"><span class="n">${esc(c.name)}님께</span><span class="s" style="display:block">${esc(c.phone)}</span></span></div>
     ${already}
     <div class="field"><label for="msg">보낼 내용 (고쳐도 돼요)</label><textarea id="msg" rows="5">${esc(message(k, c))}</textarea></div>
-    <a class="btn fill" id="go" href="#">💌 문자앱 열기</a>
+    <a class="btn sms" id="go" href="#">💌 문자앱 열기</a>
     <p class="help">문자앱이 내용이 채워진 채로 열려요. 문자앱에서 <b>전송</b>을 누르면 발송이 끝나요.</p>`, s => {
     const ta = s.querySelector("#msg"), go = s.querySelector("#go");
     const upd = () => go.href = smsHref(c.phone, ta.value);
